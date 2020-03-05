@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.joaog.curso.entities.User;
 
+/* @ResController diz que a classe UserResource é um recurso web implementada por um controlador REST */
 @RestController
 @RequestMapping(value = "/users") /* Caminho do recurso */
 public class UserResource {

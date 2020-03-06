@@ -3,6 +3,8 @@ package com.joaog.curso.services;
 import java.util.List;
 import java.util.Optional;
 
+import javax.persistence.EntityNotFoundException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -16,43 +18,47 @@ import com.joaog.curso.services.exceptions.ResourceNotFoundException;
 /* Registra a classe como Serviço do Spring */
 @Service
 public class UserService {
-	
+
 	/* Injeção de dependência */
 	@Autowired
 	private UserRepository repository;
-	
+
 	/* Retorna todos os usuários */
 	public List<User> findAll() {
 		return repository.findAll();
 	}
-	
+
 	/* Encontra por Id e faz o tratamento das exceções */
 	public User findById(Long id) {
 		Optional<User> obj = repository.findById(id);
 		return obj.orElseThrow(() -> new ResourceNotFoundException(id));
 	}
-	
+
 	/* Inserção */
 	public User insert(User obj) {
 		return repository.save(obj);
 	}
-	
-	/* Deleção e tratamento de exceções*/
+
+	/* Deleção e tratamento de exceções */
 	public void delete(Long id) {
 		try {
 			repository.deleteById(id);
-		} catch(EmptyResultDataAccessException e) {
+		} catch (EmptyResultDataAccessException e) {
 			throw new ResourceNotFoundException(id);
-		} catch(DataIntegrityViolationException e) {
+		} catch (DataIntegrityViolationException e) {
 			throw new DatabaseException(e.getMessage());
 		}
 	}
-	
+
 	/* Atualização */
 	public User update(Long id, User obj) {
-		User entity = repository.getOne(id);
-		updateData(entity, obj);
-		return repository.save(entity);
+		try {
+			User entity = repository.getOne(id);
+			updateData(entity, obj);
+			return repository.save(entity);
+		} catch (EntityNotFoundException e) {
+			throw new ResourceNotFoundException(id);
+		}
 	}
 
 	private void updateData(User entity, User obj) {
